@@ -4,20 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oracle of Shadows</title>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1MMGSCXS6V"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1MMGSCXS6V');
+    </script>
+    <!-- End Google Analytics -->
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'IM Fell English SC', serif;
-            background-color: #121212;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232a2a2a' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-color: #0c0c14;
             text-shadow: 0 0 5px rgba(155, 89, 182, 0.3);
         }
+        
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        #background-container::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            z-index: -1;
+            background: radial-gradient(circle at center, rgba(40, 20, 60, 0.4) 0%, rgba(12, 12, 20, 0) 60%);
+            animation: background-pan 60s linear infinite;
+        }
+
+        @keyframes background-pan {
+            0% { transform: translateX(10%) translateY(10%); }
+            25% { transform: translateX(-10%) translateY(10%); }
+            50% { transform: translateX(-10%) translateY(-10%); }
+            75% { transform: translateX(10%) translateY(-10%); }
+            100% { transform: translateX(10%) translateY(10%); }
+        }
+
         .font-unifraktur {
             font-family: 'UnifrakturMaguntia', cursive;
         }
+
         .scrying-orb {
             width: 300px;
             height: 300px;
@@ -29,9 +74,6 @@
                 0 0 15px #4a0e6b,
                 0 0 30px #8e44ad,
                 0 0 45px #9b59b6 inset;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             position: relative;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -45,6 +87,17 @@
                 0 0 50px #9b59b6 inset;
             transform: scale(1.03);
         }
+
+        .inner-glow {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(220, 180, 255, 0.4) 0%, rgba(155, 89, 182, 0) 70%);
+            animation: pulse 5s ease-in-out infinite;
+            z-index: 5;
+        }
+
         .orb-window {
             width: 160px;
             height: 160px;
@@ -58,6 +111,7 @@
             border: 2px solid #2a0a3d;
             box-shadow: inset 0 0 35px #000;
             position: relative;
+            z-index: 10;
         }
         .orb-window::before {
             content: '';
@@ -70,9 +124,8 @@
             animation: swirl 10s linear infinite;
         }
         #answer-text {
-            color: #e6e6fa; /* Lavender */
+            color: #e6e6fa;
             font-size: 16px;
-            font-weight: normal;
             opacity: 1;
             transition: opacity 1s ease-in-out, transform 1s ease-in-out;
             text-shadow: 0 0 8px #9b59b6, 0 0 12px #d8b2f2;
@@ -81,69 +134,181 @@
             line-height: 1.3;
         }
         
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); }
+        .rune-loader span {
+            display: inline-block;
+            opacity: 0;
+            animation: rune-fade 2s infinite;
+        }
+        .rune-loader span:nth-child(1) { animation-delay: 0s; }
+        .rune-loader span:nth-child(2) { animation-delay: 0.5s; }
+        .rune-loader span:nth-child(3) { animation-delay: 1s; }
+        .rune-loader span:nth-child(4) { animation-delay: 1.5s; }
+
+        @keyframes rune-fade {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
         }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0px); }
+        #history-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 250px;
+            max-height: 30%;
+            background: rgba(10, 5, 15, 0.8);
+            border: 1px solid #4a0e6b;
+            border-radius: 8px;
+            padding: 10px;
+            color: #d8b2f2;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(74, 14, 107, 0.5);
+            overflow-y: auto;
+            z-index: 100;
         }
-        
-        @keyframes swirl {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        .history-item {
+            font-size: 12px;
+            border-bottom: 1px solid #3c1e54;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
         }
+        .history-item strong { color: #e6e6fa; }
         
-        @keyframes pulse {
-            50% { opacity: 0.6; }
+        #vision-pane-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 199;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        #vision-pane-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #vision-pane {
+            background: rgba(12, 12, 20, 0.9);
+            border: 2px solid #4a0e6b;
+            border-radius: 10px;
+            box-shadow: 0 0 30px #8e44ad;
+            color: #e6e6fa;
+            max-width: 90%;
+            width: 500px;
+            padding: 2rem;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #vision-text {
+            overflow-y: auto;
+            line-height: 1.6;
+            flex-grow: 1;
         }
 
-        .shaking {
-            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-        }
-        .loading-text {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        @keyframes shake { 0%, 100% { transform: translate(0, 0) rotate(0); } 10% { transform: translate(-2px, -3px) rotate(-1deg); } 20% { transform: translate(3px, 0px) rotate(1deg); } 30% { transform: translate(-3px, 3px) rotate(0deg); } 40% { transform: translate(2px, -2px) rotate(1deg); } 50% { transform: translate(-1px, 3px) rotate(-1deg); } 60% { transform: translate(3px, 1px) rotate(0deg); } 70% { transform: translate(-3px, 1px) rotate(-1deg); } 80% { transform: translate(2px, -1px) rotate(1deg); } 90% { transform: translate(-1px, 3px) rotate(0deg); } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        @keyframes swirl { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 50% { opacity: 0.6; transform: scale(1.1); } }
+
+        .shaking { animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both; }
     </style>
 </head>
-<body class="bg-black text-gray-300 flex flex-col items-center justify-center min-h-screen p-4">
-    <!-- Main container for the oracle -->
-    <div id="oracle-container" class="w-full max-w-md mx-auto text-center">
-        
-        <h1 class="font-unifraktur text-6xl md:text-7xl text-purple-300 mb-2" style="text-shadow: 0 0 10px #9b59b6;">Oracle of Shadows</h1>
-        <p class="text-gray-400 mb-8 tracking-wider">The aether awaits your question...</p>
+<body class="bg-black text-gray-300">
 
-        <!-- The Scrying Orb -->
-        <div id="scrying-orb" class="scrying-orb mx-auto mb-8">
-            <div class="orb-window">
-                <span id="answer-text">?</span>
+    <div id="background-container"></div>
+
+    <div class="flex flex-col items-center justify-center min-h-screen w-full p-4 relative z-10">
+        <div id="main-content" class="flex flex-col items-center justify-center text-center">
+            <h1 class="font-unifraktur text-6xl md:text-7xl text-purple-300 mb-2" style="text-shadow: 0 0 10px #9b59b6;">Oracle of Shadows</h1>
+            <p class="text-gray-400 mb-8 tracking-wider">The aether awaits your question...</p>
+            
+            <div id="scrying-orb" class="scrying-orb mx-auto mb-8 flex items-center justify-center">
+                <div class="inner-glow"></div>
+                <div class="orb-window">
+                    <span id="answer-text">?</span>
+                </div>
+            </div>
+            
+            <div class="w-full max-w-md space-y-3">
+                <input type="text" id="question-input" placeholder="Inscribe your query..." class="w-full bg-gray-900/50 border border-purple-800 text-gray-300 placeholder-gray-500 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow">
+                
+                <button id="ask-button" class="w-full bg-purple-900/80 hover:bg-purple-800 text-gray-200 font-bold py-3 px-6 rounded-md shadow-lg shadow-purple-900/50 transition-all duration-300 transform hover:scale-105 tracking-widest">Gaze into the Orb</button>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="prophecy-button" class="w-full bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 font-bold py-3 px-4 rounded-md shadow-lg shadow-indigo-900/50 transition-all duration-300 transform hover:scale-105 text-sm">🔮 Cryptic Prophecy</button>
+                    <button id="direct-answer-button" class="w-full bg-teal-900/80 hover:bg-teal-800 text-teal-200 font-bold py-3 px-4 rounded-md shadow-lg shadow-teal-900/50 transition-all duration-300 transform hover:scale-105 text-sm">💡 Straight Answer</button>
+                </div>
+                
+                <div class="h-8 flex items-center justify-center">
+                     <button id="share-button" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-md text-xs transition-opacity">Copy Prophecy</button>
+                </div>
             </div>
         </div>
-        
-        <!-- Input and Buttons -->
-        <div class="w-full space-y-3">
-            <input type="text" id="question-input" placeholder="Inscribe your query..." class="w-full bg-gray-900/50 border border-purple-800 text-gray-300 placeholder-gray-500 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow">
-            <button id="ask-button" class="w-full bg-purple-900/80 hover:bg-purple-800/90 text-gray-200 font-bold py-3 px-6 rounded-md shadow-lg shadow-purple-900/50 hover:shadow-purple-800/60 transition-all duration-300 transform hover:scale-105 tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
-                Gaze into the Orb
-            </button>
-            <button id="prophecy-button" class="w-full bg-transparent border-2 border-purple-700 hover:bg-purple-900/40 text-purple-300 font-bold py-3 px-6 rounded-md shadow-lg shadow-purple-900/30 hover:shadow-purple-800/40 transition-all duration-300 transform hover:scale-105 tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
-                ✨ Unveil a Deeper Prophecy
-            </button>
-            <p id="error-message" class="text-purple-400 mt-4 h-5"></p>
-        </div>
+    </div>
 
+    <div id="history-container" class="hidden md:block">
+        <h3 class="font-bold text-center text-sm mb-2 border-b border-purple-800 pb-1">Recent Answers</h3>
+        <div id="history-log"></div>
+    </div>
+
+    <!-- Vision Pane (Modal for long answers) -->
+    <div id="vision-pane-overlay" class="hidden">
+        <div id="vision-pane">
+            <div id="vision-text" class="mb-6"></div>
+            <button id="dismiss-vision-button" class="bg-purple-800 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md self-center">Dismiss</button>
+        </div>
     </div>
 
     <script>
+        // --- DOM Elements ---
         const scryingOrb = document.getElementById('scrying-orb');
         const answerText = document.getElementById('answer-text');
         const askButton = document.getElementById('ask-button');
         const prophecyButton = document.getElementById('prophecy-button');
+        const directAnswerButton = document.getElementById('direct-answer-button');
         const questionInput = document.getElementById('question-input');
-        const errorMessage = document.getElementById('error-message');
+        const shareButton = document.getElementById('share-button');
+        const historyLog = document.getElementById('history-log');
+        const visionPaneOverlay = document.getElementById('vision-pane-overlay');
+        const visionText = document.getElementById('vision-text');
+        const dismissVisionButton = document.getElementById('dismiss-vision-button');
 
+        let audioInitialized = false;
+        let sounds = {};
+
+        // --- Sound Effects ---
+        function initializeAudio() {
+            sounds.shake = new Tone.NoiseSynth({ noise: { type: 'brown' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0 } }).toDestination();
+            sounds.chime = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 1 } }).toDestination();
+            sounds.hum = new Tone.Loop(time => {
+                const synth = new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 2, decay: 1, sustain: 0.5, release: 2 } }).toDestination();
+                synth.triggerAttackRelease("C2", "4n", time);
+            }, "2n").start(0);
+            Tone.Transport.start();
+            audioInitialized = true;
+        }
+
+        function playSound(soundName) {
+            if (!audioInitialized) return;
+            if (soundName === 'shake') sounds.shake.triggerAttack();
+            if (soundName === 'chime') sounds.chime.triggerAttackRelease("C5", "8n");
+        }
+        
+        document.body.addEventListener('click', () => {
+            if (!audioInitialized) {
+                Tone.start();
+                initializeAudio();
+            }
+        }, { once: true });
+
+        // --- NEW Expanded Answer Pool ---
         const gothAnswers = [
             "The stars bleed a grim yes.", "As I see it, in the darkest way, yes.", "The abyss gazes back with a 'no'.",
             "A future as bleak as a forgotten tomb.", "Signs point to a sorrowful yes.", "Don't count on it, child of the night.",
@@ -151,58 +316,182 @@
             "Cannot predict now; the void is silent.", "Outlook... not so good.", "The spirits are restless. Try again.",
             "Without a doubt, like death itself.", "You may rely on it, for what little that's worth.", "Very doubtful. The omens are poor.",
             "The answer is shrouded in fog.", "It is certain, like the coming dusk.", "My reply is a resounding 'no'.",
-            "Yes, but at what cost?", "Concentrate and ask again when the moon weeps."
+            "Yes, but at what cost?", "Concentrate and ask again when the moon weeps.", "The shadows conspire in your favor.",
+            "A path forward is illuminated by moonlight.", "Undoubtedly, the spirits concur.", "The cosmos answers with a chilling silence.",
+            "Such hopes are but dust in the wind.", "The raven croaks a definitive 'nevermore'.", "The reflection in the orb is clouded.",
+            "Fate has not yet written that chapter.", "Seek clarity within before you ask again of the without.", "The outcome is as certain as your own mortality.",
+            "No. A thousand times no.", "The bones have been cast, and they say yes.", "A whisper from the beyond affirms it.",
+
+            "To hope for such a thing is folly.", "The answer lies buried, best left undisturbed.", "The celestial alignment is unfavorable.",
+            "Yes, and it will arrive sooner than you think.", "The cards foretell a negative outcome.", "The vision is one of success.",
+            "Even the dead are silent on this matter.", "A firm and resolute 'yes' echoes from the void.", "Do not press the issue further.",
+            "The path is clear, the answer is yes.", "The answer is no, and you should be glad for it."
         ];
 
+        // --- Answer History ---
+        let answerHistory = [];
+        function updateHistoryLog(question, answer) {
+            answerHistory.unshift({ question, answer });
+            if (answerHistory.length > 5) answerHistory.pop();
+            
+            historyLog.innerHTML = answerHistory.map(item => `
+                <div class="history-item">
+                    <strong>Q:</strong> ${item.question}<br>
+                    <strong>A:</strong> ${item.answer.substring(0, 100)}${item.answer.length > 100 ? '...' : ''}
+                </div>
+            `).join('');
+        }
+        
+        // --- Vision Pane Functions ---
+        function showVision(fullAnswer) {
+            visionText.innerHTML = fullAnswer.replace(/\n/g, '<br>'); // Preserve line breaks
+            visionPaneOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                visionPaneOverlay.classList.add('visible');
+            }, 10);
+        }
+
+        function hideVision() {
+            visionPaneOverlay.classList.remove('visible');
+             setTimeout(() => {
+                visionPaneOverlay.classList.add('hidden');
+            }, 300);
+        }
+
+        // --- Core Functions ---
         function getAnswer() {
-            if (questionInput.value.trim() === '') {
-                errorMessage.textContent = 'The void cannot answer an unasked question.';
-                return;
-            }
-            errorMessage.textContent = '';
+            const question = questionInput.value.trim();
+            if (!question) return;
             
-            answerText.style.opacity = '0';
             scryingOrb.classList.add('shaking');
-            
+            playSound('shake');
+            setLoading(true, 'classic');
+
             setTimeout(() => {
                 scryingOrb.classList.remove('shaking');
                 const randomIndex = Math.floor(Math.random() * gothAnswers.length);
-                answerText.textContent = gothAnswers[randomIndex];
-                answerText.style.opacity = '1';
-            }, 1000);
+                const answer = gothAnswers[randomIndex];
+                answerText.textContent = answer;
+                updateHistoryLog(question, answer);
+                playSound('chime');
+                setLoading(false);
+            }, 1200);
         }
 
-        // --- Gemini API Feature ---
-
-        async function getProphecy() {
+        // --- Gemini API Functions ---
+        async function getAiAnswer(promptType) {
             const question = questionInput.value.trim();
-            if (question === '') {
-                errorMessage.textContent = 'A prophecy requires a query of substance.';
-                return;
-            }
-            errorMessage.textContent = '';
-            
-            // Disable buttons and show loading state
-            setLoading(true);
+            if (!question) return;
 
-            const apiKey = ""; // API key is handled by the environment, leave blank.
+            setLoading(true, 'ai');
+            playSound('shake');
+
+            const apiKey = ""; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
-            const systemPrompt = "You are the Oracle of Shadows. Your voice is ancient, steeped in mystery and gothic prose. You never give a direct or simple answer. Instead, you weave prophecies from the threads of fate.";
-            const userQuery = `A mortal seeks guidance. Their question is: "${question}". Respond with a short, cryptic, three-line poem that hints at the future, leaving them to ponder its true meaning. Your tone must be dark and poetic.`;
+            let systemPrompt = "";
+            let userQuery = `A mortal seeks guidance. Their question is: "${question}".`;
+            
+            if (promptType === 'prophecy') {
+                systemPrompt = "You are the Oracle of Shadows. Your voice is ancient, steeped in mystery and gothic prose. You never give a direct or simple answer. Instead, you weave prophecies from the threads of fate.";
+                userQuery += " Respond with a short, cryptic, three-line poem that hints at the future, leaving them to ponder its true meaning. Your tone must be dark and poetic.";
+            } else if (promptType === 'direct') {
+                systemPrompt = "You are a logical, straightforward AI assistant. You must give a direct answer. Start with 'Yes.', 'No.', or 'Uncertain.', then provide a single, concise sentence of explanation or reasoning.";
+                userQuery += " Provide a direct answer based on logical probability and general knowledge.";
+            }
 
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemPrompt }] },
-            };
+            const payload = { contents: [{ parts: [{ text: userQuery }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
             
             try {
-                // Using exponential backoff for retries
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`The aether is disturbed.`);
+                const result = await response.json();
+                const aiText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (aiText) {
+                    const cleanText = aiText.trim();
+                    updateHistoryLog(question, cleanText);
+                    if (cleanText.length > 60) {
+                        answerText.textContent = "A Vision Appears...";
+                        showVision(cleanText);
+                    } else {
+                        answerText.textContent = cleanText;
+                    }
+                    if (promptType === 'prophecy') shareButton.classList.remove('hidden');
+                } else {
+                    throw new Error("The oracle's whispers are indecipherable.");
+                }
+            } catch (error) {
+                answerText.textContent = error.message;
+            } finally {
+                playSound('chime');
+                setLoading(false);
+            }
+        }
 
-                if (!response.ok) {
-                    throw new Error(`The aether is dist
+        function setLoading(isLoading, type = '') {
+            askButton.disabled = isLoading;
+            prophecyButton.disabled = isLoading;
+            directAnswerButton.disabled = isLoading;
+            shareButton.classList.add('hidden');
+            hideVision();
+
+            if (isLoading) {
+                answerText.style.opacity = '0';
+                setTimeout(() => {
+                    if (type === 'ai') {
+                        answerText.innerHTML = `<div class="rune-loader"><span>ᛟ</span> <span>ᛝ</span> <span>ᛚ</span> <span>ᛗ</span></div>`;
+                    } else {
+                        answerText.textContent = '...';
+                    }
+                    answerText.style.opacity = '1';
+                }, 400);
+            } else {
+                answerText.style.opacity = '1';
+            }
+        }
+
+        // --- Event Listeners ---
+        askButton.addEventListener('click', getAnswer);
+        prophecyButton.addEventListener('click', () => getAiAnswer('prophecy'));
+        directAnswerButton.addEventListener('click', () => getAiAnswer('direct'));
+        
+        questionInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') getAnswer();
+        });
+        
+        scryingOrb.addEventListener('click', getAnswer);
+
+        shareButton.addEventListener('click', () => {
+            const textToCopy = visionText.textContent || answerText.textContent;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                shareButton.textContent = 'Copied!';
+                setTimeout(() => { shareButton.textContent = 'Copy Prophecy'; }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+            document.body.removeChild(tempTextArea);
+        });
+        
+        dismissVisionButton.addEventListener('click', hideVision);
+        visionPaneOverlay.addEventListener('click', (e) => {
+            if (e.target === visionPaneOverlay) {
+                hideVision();
+            }
+        });
+
+    </script>
+    
+    <!-- Buy Me a Coffee floating button -->
+    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="MoonLitCo" data-color="#000000" data-emoji="🌙"  data-font="Lato" data-text="Buy me a coffee" data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#FFDD00" ></script>
+    
+    <!-- Clicky Tracking Code -->
+    <script async data-id="101494672" src="//static.getclicky.com/js"></script>
+    
+</body>
+</html>
+

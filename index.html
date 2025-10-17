@@ -211,6 +211,24 @@
             line-height: 1.6;
             flex-grow: 1;
         }
+        
+        #mic-button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #8e44ad;
+            transition: color 0.2s;
+        }
+        #mic-button:hover {
+            color: #c593e0;
+        }
+        .mic-active {
+            color: #e74c3c !important;
+            animation: pulse-red 1.5s infinite;
+        }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
         @keyframes shake { 0%, 100% { transform: translate(0, 0) rotate(0); } 10% { transform: translate(-2px, -3px) rotate(-1deg); } 20% { transform: translate(3px, 0px) rotate(1deg); } 30% { transform: translate(-3px, 3px) rotate(0deg); } 40% { transform: translate(2px, -2px) rotate(1deg); } 50% { transform: translate(-1px, 3px) rotate(-1deg); } 60% { transform: translate(3px, 1px) rotate(0deg); } 70% { transform: translate(-3px, 1px) rotate(-1deg); } 80% { transform: translate(2px, -1px) rotate(1deg); } 90% { transform: translate(-1px, 3px) rotate(0deg); } }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
@@ -237,7 +255,12 @@
             </div>
             
             <div class="w-full max-w-md space-y-3">
-                <input type="text" id="question-input" placeholder="Inscribe your query..." class="w-full bg-gray-900/50 border border-purple-800 text-gray-300 placeholder-gray-500 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow">
+                <div class="relative w-full">
+                    <input type="text" id="question-input" placeholder="Inscribe your query or tap the mic..." class="w-full bg-gray-900/50 border border-purple-800 text-gray-300 placeholder-gray-500 rounded-md pl-4 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow">
+                    <span id="mic-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
+                    </span>
+                </div>
                 
                 <button id="ask-button" class="w-full bg-purple-900/80 hover:bg-purple-800 text-gray-200 font-bold py-3 px-6 rounded-md shadow-lg shadow-purple-900/50 transition-all duration-300 transform hover:scale-105 tracking-widest">Gaze into the Orb</button>
                 
@@ -250,6 +273,7 @@
                      <button id="share-button" class="hidden bg-gray-700 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded-md text-xs transition-opacity">Copy Prophecy</button>
                 </div>
             </div>
+            <p class="text-xs text-gray-600 mt-8">Questions may be logged anonymously for mystical analysis.</p>
         </div>
     </div>
 
@@ -279,6 +303,7 @@
         const visionPaneOverlay = document.getElementById('vision-pane-overlay');
         const visionText = document.getElementById('vision-text');
         const dismissVisionButton = document.getElementById('dismiss-vision-button');
+        const micButton = document.getElementById('mic-button');
 
         let audioInitialized = false;
         let sounds = {};
@@ -308,7 +333,7 @@
             }
         }, { once: true });
 
-        // --- NEW Expanded Answer Pool ---
+        // --- Expanded Answer Pool ---
         const gothAnswers = [
             "The stars bleed a grim yes.", "As I see it, in the darkest way, yes.", "The abyss gazes back with a 'no'.",
             "A future as bleak as a forgotten tomb.", "Signs point to a sorrowful yes.", "Don't count on it, child of the night.",
@@ -447,6 +472,43 @@
             } else {
                 answerText.style.opacity = '1';
             }
+        }
+        
+        // --- Voice Recognition ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            micButton.addEventListener('click', () => {
+                recognition.start();
+            });
+
+            recognition.onstart = () => {
+                micButton.classList.add('mic-active');
+                questionInput.placeholder = 'Listening...';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                questionInput.value = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error", event.error);
+                questionInput.placeholder = 'Voice recognition error.';
+            };
+            
+            recognition.onend = () => {
+                micButton.classList.remove('mic-active');
+                questionInput.placeholder = 'Inscribe your query or tap the mic...';
+            };
+
+        } else {
+            micButton.style.display = 'none'; // Hide mic if not supported
         }
 
         // --- Event Listeners ---
